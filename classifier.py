@@ -1,37 +1,37 @@
 import re
-from data_process import dataset, feature_set, no_of_items
+from data_process import dataSet, feature_set, no_of_items
 
 
-# To calculate the basic probability of a word for a category
+#   To calculate the basic probability of a word for a category
 def calc_prob(word, category):
-    if word not in feature_set or word not in dataset[category]:
+    if word not in feature_set or word not in dataSet[category]:
         return 0
 
-    return float(dataset[category][word]) / no_of_items[category]
+    return float(dataSet[category][word]) / no_of_items[category]
 
 
-# Weighted probability of a word for a category
+#   Weighted probability of a word for a category
 def weighted_prob(word, category):
-    # basic probability of a word - calculated by calc_prob
+    #   basic probability of a word - calculated by calc_prob
     basic_prob = calc_prob(word, category)
 
-    # total_no_of_appearances - in all the categories
+    #   total_no_of_appearances - in all the categories
     if word in feature_set:
         tot = sum(feature_set[word].values())
     else:
         tot = 0
 
-    # Weighted probability is given by the formula
-    # (weight*assumedprobability + total_no_of_appearances*basic_probability)/(total_no_of_appearances+weight)
-    # weight by default is taken as 1.0
-    # assumed probability is 0.5 here
+    #   Weighted probability is given by the formula
+    #   (weight * assumed probability + total_no_of_appearances * basic_probability) / (total_no_of_appearances+weight)
+    #   weight by default is taken as 1.0
+    #   assumed probability is 0.5 here
     weight_prob = ((1.0 * 0.5) + (tot * basic_prob)) / (1.0 + tot)
     return weight_prob
 
 
-# To get probability of the test data for the given category
+#   To get probability of the test data for the given category
 def t_prob(test, category):
-    # Split the test data
+    #   Split the test data
     split_data = re.split('[^a-zA-Z][\'][ ]', test)
 
     data = []
@@ -50,30 +50,29 @@ def t_prob(test, category):
     return p
 
 
-# Naive Bayes implementation
+#   Naive Bayes implementation
 def naive_bayes(test):
-    '''
-        p(A|B) = p(B|A) * p(A) / p(B)
 
-        Assume A - Category
-               B - Test data
-               p(A|B) - Category given the Test data
+        #   p(A|B) = p(B|A) * p(A) / p(B)
+        #
+        #   Assume A - Category
+        #           B - Test data
+        #           p(A|B) - Category given the Test data
+        #
+        #   Here ignoring p(B) in the denominator (Since it remains same for every category)
 
-        Here ignoring p(B) in the denominator (Since it remains same for every category)
-    '''
     results = {}
-    for i in dataset.keys():
-        # Category Probability
-        # Number of items in category/total number of items
+    for i in dataSet.keys():
+        #   Category Probability
+        #   Number of items in category/total number of items
         cat_prob = float(no_of_items[i]) / sum(no_of_items.values())
 
-        # p(test data | category)
+        #   p(test data | category)
         t_prob1 = t_prob(test, i)
 
         results[i] = t_prob1 * cat_prob
 
     return results
-
 
 
 def classify_comment(str):
@@ -83,6 +82,3 @@ def classify_comment(str):
         return 'positive'
     else:
         return 'negative'
-
-# str = raw_input()
-# classify_comment(str)
